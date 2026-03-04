@@ -922,6 +922,9 @@ export default class DevTools extends LightningElement {
         if (tabId) {
             this._activeTab = tabId;
             this._ensureSoqlReady(tabId);
+            if (tabId === 'dataLoader' && !this._allObjects) {
+                this._prefetchObjects();
+            }
         }
     }
 
@@ -2403,7 +2406,7 @@ export default class DevTools extends LightningElement {
     }
 
     async _searchDlObjects(searchTerm) {
-        if (!searchTerm || searchTerm.length < 2) {
+        if (!searchTerm || searchTerm.length < 1) {
             this._dlObjectResults = [];
             return;
         }
@@ -2415,9 +2418,20 @@ export default class DevTools extends LightningElement {
             }
         }
         const search = searchTerm.toLowerCase();
-        this._dlObjectResults = this._allObjects
-            .filter(o => (o.apiName || '').toLowerCase().includes(search) || (o.label || '').toLowerCase().includes(search))
-            .slice(0, 15);
+        const matches = this._allObjects
+            .filter(o => (o.apiName || '').toLowerCase().includes(search) || (o.label || '').toLowerCase().includes(search));
+        // Sort: exact prefix on apiName first, then prefix on label, then rest
+        matches.sort((a, b) => {
+            const aApi = (a.apiName || '').toLowerCase();
+            const bApi = (b.apiName || '').toLowerCase();
+            const aLabel = (a.label || '').toLowerCase();
+            const bLabel = (b.label || '').toLowerCase();
+            const aExact = aApi === search ? 0 : aApi.startsWith(search) ? 1 : aLabel.startsWith(search) ? 2 : 3;
+            const bExact = bApi === search ? 0 : bApi.startsWith(search) ? 1 : bLabel.startsWith(search) ? 2 : 3;
+            if (aExact !== bExact) return aExact - bExact;
+            return aApi.localeCompare(bApi);
+        });
+        this._dlObjectResults = [...matches.slice(0, 20)];
     }
 
     handleDlSelectObject(event) {

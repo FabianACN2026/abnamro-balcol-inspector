@@ -762,11 +762,11 @@
                         <div class="abn-flex-col abn-gap-md">
                             <div>
                                 <label class="abn-form-label abn-mb-sm">Operation</label>
-                                <div class="abn-flex abn-gap-sm">
+                                <div class="abn-flex abn-gap-md abn-dl-ops">
                                     <template for:each={_dlOperations} for:item="op">
                                         <button key={op.value} class={op.btnClass} data-value={op.value} onclick={handleDlSelectOperation}>
                                             {op.label}
-                                            <span class="abn-text-xs abn-text-muted" style="display:block;font-weight:normal">{op.description}</span>
+                                            <span class="abn-dl-op-desc">{op.description}</span>
                                         </button>
                                     </template>
                                 </div>
