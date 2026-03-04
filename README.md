@@ -20,7 +20,7 @@ directly inside your Salesforce org — zero external dependencies.
 
 <br>
 
-<a href="https://githubsfdeploy.herokuapp.com?owner=FabianACN2026&repo=abnamro-balcol-inspector&ref=main">
+<a href="https://githubsfdeploy.herokuapp.com?owner=FabianACN2026&repo=balcol-inspector&ref=main">
   <img alt="Deploy to Salesforce" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png">
 </a>
 
@@ -228,13 +228,13 @@ sf apex run test \
 
 ## Documentation
 
-**[View the full documentation site](https://fabianacn2026.github.io/abnamro-balcol-inspector-docs/)**
+**[View the full documentation site](https://fabianacn2026.github.io/balcol-inspector-docs/)**
 
 | | Document | What You'll Find |
 |:---:|---|---|
-| 📖 | **[Technical Documentation](https://fabianacn2026.github.io/abnamro-balcol-inspector-docs/technical-documentation.html)** | Architecture deep-dive, API reference, implementation details |
-| 🚀 | **[Quick Start Guide](https://fabianacn2026.github.io/abnamro-balcol-inspector-docs/quick-start-guide.html)** | Step-by-step deployment and first-use walkthrough |
-| 👋 | **[Onboarding](https://fabianacn2026.github.io/abnamro-balcol-inspector-docs/)** | Interactive visual guide for new users |
+| 📖 | **[Technical Documentation](https://fabianacn2026.github.io/balcol-inspector-docs/technical-documentation.html)** | Architecture deep-dive, API reference, implementation details |
+| 🚀 | **[Quick Start Guide](https://fabianacn2026.github.io/balcol-inspector-docs/quick-start-guide.html)** | Step-by-step deployment and first-use walkthrough |
+| 👋 | **[Onboarding](https://fabianacn2026.github.io/balcol-inspector-docs/)** | Interactive visual guide for new users |
 
 <br>
 
