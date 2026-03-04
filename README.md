@@ -101,10 +101,9 @@ sf project deploy start \
 
 <br>
 
-1. **Custom Permissions** — Create `Dev_Tools_Access` and `Dev_Tools_Power` in Setup → Custom Permissions
-2. **Permission Sets** — Assign the permissions to the appropriate users
-3. **Lightning Page** — Drag `devTools` onto any App Page via App Builder
-4. **Remote Site** — Add your My Domain URL for cursor-based pagination (`SelfOrgCalloutHelper`)
+1. **Permission Set** — Assign `ABN Dev Tools Admin` to users (Setup → Permission Sets). This includes all required custom permissions and Apex class access.
+2. **Lightning Page** — Drag `devTools` onto any App Page via App Builder
+3. **Remote Site** — Add your My Domain URL for cursor-based pagination (`SelfOrgCalloutHelper`)
 
 </details>
 
@@ -192,10 +191,18 @@ force-app/main/default/
 
 ## Permissions
 
-| Permission | Scope | Grants Access To |
-|:---|:---|:---|
-| `Dev_Tools_Access` | All users | Record Inspector, SOQL Explorer |
-| `Dev_Tools_Power` | Power users | Apex Runner, Data Loader |
+A single permission set is deployed with the package:
+
+| Permission Set | What It Includes |
+|:---|:---|
+| **ABN Dev Tools Admin** | Full access to all 4 tools — includes `Dev_Tools_Access` + `Dev_Tools_Power` custom permissions, all Apex class access, and VF page access |
+
+> **Granular access?** The code checks two custom permissions internally. To create a read-only tier, make a second permission set with only `Dev_Tools_Access` — this grants Record Inspector and SOQL Explorer but blocks Apex Runner and Data Loader.
+
+| Custom Permission | Grants |
+|:---|:---|
+| `Dev_Tools_Access` | Record Inspector, SOQL Explorer |
+| `Dev_Tools_Power` | Apex Runner, Data Loader |
 
 <br>
 

@@ -1296,31 +1296,36 @@
   <span class="flag">--target-org</span> <span class="str">myorg</span> \
   <span class="flag">--wait</span> <span class="num">10</span></pre>
 
-            <h3>Permission Sets</h3>
+            <h3>Permission Set</h3>
+            <p>The deployment includes a single permission set that grants full access:</p>
             <div class="table-wrap">
                 <table>
                     <thead>
-                        <tr><th>Permission Set</th><th>Purpose</th><th>Assign To</th></tr>
+                        <tr><th>Permission Set</th><th>Includes</th><th>Assign To</th></tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><code>Dev_Tools_Access</code></td>
-                            <td>Basic access &mdash; Record Inspector, metadata browsing</td>
-                            <td>All users who need developer tool access</td>
-                        </tr>
-                        <tr>
-                            <td><code>Dev_Tools_Power</code></td>
-                            <td>Advanced &mdash; SOQL Explorer, Apex Runner, Data Loader, exports, deletes</td>
+                            <td><code>ABN Dev Tools Admin</code></td>
+                            <td><code>Dev_Tools_Access</code> + <code>Dev_Tools_Power</code> custom permissions, all Apex class access, VF page access</td>
                             <td>Developers, administrators, power users</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
+            <div class="callout callout-info">
+                <div class="callout-title">Granular Access</div>
+                For read-only access (Record Inspector + SOQL Explorer only), create a second permission set with just the <code>Dev_Tools_Access</code> custom permission. The code checks two custom permissions internally:
+                <ul style="margin-top:8px;margin-bottom:0;">
+                    <li><code>Dev_Tools_Access</code> &mdash; Record Inspector, SOQL Explorer</li>
+                    <li><code>Dev_Tools_Power</code> &mdash; Apex Runner, Data Loader</li>
+                </ul>
+            </div>
+
             <h4>Assignment Steps</h4>
             <ol class="steps">
                 <li>Navigate to <strong>Setup</strong> &rarr; <strong>Permission Sets</strong></li>
-                <li>Click on the desired permission set (<code>Dev_Tools_Access</code> or <code>Dev_Tools_Power</code>)</li>
+                <li>Click on <strong>ABN Dev Tools Admin</strong></li>
                 <li>Click <strong>Manage Assignments</strong> &rarr; <strong>Add Assignment</strong></li>
                 <li>Select users and click <strong>Assign</strong></li>
             </ol>
@@ -1347,8 +1352,8 @@
                 <li>Verify Remote Site Settings for self-org callouts (Tooling API, REST API)</li>
                 <li>Check Visualforce page <code>DevToolsSessionId</code> exists (session ID retrieval)</li>
                 <li>Confirm Named Credential or Connected App if needed for REST callouts</li>
-                <li>Test access with <code>Dev_Tools_Access</code> permission &mdash; verify Record Inspector loads</li>
-                <li>Test access with <code>Dev_Tools_Power</code> permission &mdash; verify all 4 tools are available</li>
+                <li>Assign <code>ABN Dev Tools Admin</code> permission set to test user</li>
+                <li>Test access with the permission set assigned &mdash; verify all 4 tools are available</li>
                 <li>Test access with no permission &mdash; verify access denied message appears</li>
                 <li>Verify SOQL query execution against a known object (e.g., <code>SELECT Id FROM Account LIMIT 1</code>)</li>
                 <li>Verify Apex Runner can execute anonymous code and retrieve debug logs</li>
