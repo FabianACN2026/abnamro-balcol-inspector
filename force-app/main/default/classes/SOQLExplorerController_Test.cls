@@ -247,6 +247,33 @@ private class SOQLExplorerController_Test {
         Map<String, Object> first = fields[0];
         System.assert(first.containsKey('apiName'));
         System.assert(first.containsKey('type'));
+        System.assert(first.containsKey('isUpdateable'), 'Field should include isUpdateable');
+        System.assert(first.containsKey('isCreateable'), 'Field should include isCreateable');
+    }
+
+    @IsTest
+    static void testGetFields_UpdateableAndCreateable() {
+        SecurityUtil.testPermissionOverride = true;
+        List<Map<String, Object>> fields = SOQLExplorerController.getFields('Account');
+        // Name field should be both updateable and createable
+        Boolean foundName = false;
+        for (Map<String, Object> f : fields) {
+            if (f.get('apiName') == 'Name') {
+                foundName = true;
+                System.assertEquals(true, f.get('isUpdateable'), 'Account.Name should be updateable');
+                System.assertEquals(true, f.get('isCreateable'), 'Account.Name should be createable');
+                break;
+            }
+        }
+        System.assert(foundName, 'Should find Name field in Account fields');
+        // Id field should not be updateable or createable
+        for (Map<String, Object> f : fields) {
+            if (f.get('apiName') == 'Id') {
+                System.assertEquals(false, f.get('isUpdateable'), 'Id should not be updateable');
+                System.assertEquals(false, f.get('isCreateable'), 'Id should not be createable');
+                break;
+            }
+        }
     }
 
     // ─── getQueryPlan (needs HTTP mock) ───

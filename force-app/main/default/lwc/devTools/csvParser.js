@@ -138,9 +138,9 @@ export function autoMapFields(csvHeaders, sfFields) {
         mappings.push({
             csvIndex: index,
             csvHeader: header,
-            sfField: match ? match.apiName : null,
-            sfFieldLabel: match ? match.label : null,
-            sfFieldType: match ? match.type : null,
+            sfField: match ? match.apiName : '',
+            sfFieldLabel: match ? match.label : '',
+            sfFieldType: match ? match.type : '',
             confidence,
             isMatched: match != null
         });

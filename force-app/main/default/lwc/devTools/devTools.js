@@ -2452,10 +2452,10 @@ export default class DevTools extends LightningElement {
         this._dlBatchSize = parseInt(event.target.value, 10);
     }
 
-    handleDlNext() {
+    async handleDlNext() {
         if (this._dlStep < 5) {
             if (this._dlStep === 2 && this._dlParsedData) {
-                this._prepareMappings();
+                await this._prepareMappings();
             }
             this._dlStep++;
         }

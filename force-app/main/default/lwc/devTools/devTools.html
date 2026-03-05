@@ -808,7 +808,7 @@
 
                     <!-- Step 2: Import Data -->
                     <template if:true={_dlStep2}>
-                        <div class="abn-flex-col abn-gap-md">
+                        <div class="abn-flex-col abn-gap-lg">
                             <div class="abn-dropzone" onclick={handleDlFileClick} ondragover={handleDlDragOver} ondrop={handleDlDrop}>
                                 <input type="file" accept=".csv" class="abn-hidden" onchange={handleDlFileChange}/>
                                 <div class="abn-dropzone__icon">&#x1F4C4;</div>
@@ -834,7 +834,7 @@
 
                     <!-- Step 3: Map Fields -->
                     <template if:true={_dlStep3}>
-                        <div class="abn-flex-col abn-gap-md">
+                        <div class="abn-flex-col abn-gap-lg">
                             <div class="abn-results__table-wrap" style="max-height:350px">
                                 <table class="abn-mapping-table">
                                     <thead>
@@ -864,7 +864,7 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="abn-flex abn-justify-between">
+                            <div class="abn-flex abn-justify-between" style="margin-top:8px">
                                 <button class="abn-btn" onclick={handleDlBack}>Back</button>
                                 <button class="abn-btn abn-btn--primary" onclick={handleDlNext} disabled={_dlStep3Invalid}>Next</button>
                             </div>
@@ -873,7 +873,7 @@
 
                     <!-- Step 4: Execute -->
                     <template if:true={_dlStep4}>
-                        <div class="abn-flex-col abn-gap-md" style="align-items:center">
+                        <div class="abn-flex-col abn-gap-lg" style="align-items:center">
                             <div class="abn-text-sm">
                                 <strong>{_dlRecordCount}</strong> records to <strong>{_dlOperation}</strong> into <strong>{_dlSelectedObject}</strong>
                                 in <strong>{_dlBatchCount}</strong> batch(es)
@@ -908,7 +908,7 @@
 
                     <!-- Step 5: Results -->
                     <template if:true={_dlStep5}>
-                        <div class="abn-flex-col abn-gap-md">
+                        <div class="abn-flex-col abn-gap-lg">
                             <div class="abn-flex abn-gap-md abn-items-center">
                                 <span class="abn-badge abn-badge--green">Success: {_dlResultSuccess}</span>
                                 <template if:true={_dlResultFailures}>

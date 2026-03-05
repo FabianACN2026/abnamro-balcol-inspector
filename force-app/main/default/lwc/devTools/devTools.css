@@ -2294,6 +2294,7 @@ lightning-icon {
 .abn-gap-xs { gap: var(--abn-space-1); }
 .abn-gap-sm { gap: var(--abn-space-2); }
 .abn-gap-md { gap: var(--abn-space-4); }
+.abn-gap-lg { gap: 24px; }
 .abn-flex-1 { flex: 1; min-width: 0; }
 .abn-flex-shrink-0 { flex-shrink: 0; }
 .abn-w-full { width: 100%; }

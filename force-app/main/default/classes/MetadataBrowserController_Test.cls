@@ -77,6 +77,56 @@ private class MetadataBrowserController_Test {
     }
 
     @IsTest
+    static void testGetAccessibleObjects_FindsStandardObjects() {
+        // Regression: globalDescribe must return standard objects like Account
+        List<MetadataBrowserController.ObjectSummary> objects = MetadataBrowserController.getAccessibleObjects('Account');
+        Boolean foundAccount = false;
+        for (MetadataBrowserController.ObjectSummary obj : objects) {
+            if (obj.apiName == 'Account') {
+                foundAccount = true;
+                System.assertEquals(false, obj.isCustom, 'Account should not be custom');
+                System.assertNotEquals(null, obj.label);
+                break;
+            }
+        }
+        System.assert(foundAccount, 'Account must be found in accessible objects');
+    }
+
+    @IsTest
+    static void testObjectSummary_StringConstructor() {
+        MetadataBrowserController.ObjectSummary os = new MetadataBrowserController.ObjectSummary('MyObj__c', 'My Object', '0Af');
+        System.assertEquals('MyObj__c', os.apiName);
+        System.assertEquals('My Object', os.label);
+        System.assertEquals('0Af', os.keyPrefix);
+        System.assertEquals(true, os.isCustom);
+
+        MetadataBrowserController.ObjectSummary std = new MetadataBrowserController.ObjectSummary('Account', 'Account', '001');
+        System.assertEquals(false, std.isCustom);
+    }
+
+    @IsTest
+    static void testObjectSummary_Comparable() {
+        MetadataBrowserController.ObjectSummary a = new MetadataBrowserController.ObjectSummary('Account', 'Account', '001');
+        MetadataBrowserController.ObjectSummary b = new MetadataBrowserController.ObjectSummary('Contact', 'Contact', '003');
+        // Account should sort before Contact
+        System.assert(a.compareTo(b) < 0, 'Account should sort before Contact');
+        System.assert(b.compareTo(a) > 0, 'Contact should sort after Account');
+        System.assertEquals(0, a.compareTo(a), 'Same object should return 0');
+    }
+
+    @IsTest
+    static void testGetAccessibleObjects_ResultsSorted() {
+        List<MetadataBrowserController.ObjectSummary> objects = MetadataBrowserController.getAccessibleObjects(null);
+        // Verify results are sorted by label
+        for (Integer i = 1; i < objects.size() && i < 20; i++) {
+            String prevLabel = objects[i-1].label != null ? objects[i-1].label : objects[i-1].apiName;
+            String currLabel = objects[i].label != null ? objects[i].label : objects[i].apiName;
+            System.assert(prevLabel.compareTo(currLabel) <= 0,
+                'Results should be sorted: ' + prevLabel + ' should come before ' + currLabel);
+        }
+    }
+
+    @IsTest
     static void testRelationshipInfoWrapper() {
         MetadataBrowserController.ObjectDetail detail = MetadataBrowserController.getObjectDetail('Account');
         if (!detail.relationships.isEmpty()) {
