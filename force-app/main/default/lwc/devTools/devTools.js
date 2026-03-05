@@ -439,7 +439,44 @@ export default class DevTools extends LightningElement {
     }
 
     get _currentTabResults() {
-        return this._currentTab ? this._currentTab.results : [];
+        return this._currentTab ? this._currentTab.flatResults || this._currentTab.results : [];
+    }
+
+    _flattenRecords(records) {
+        if (!records || !records.length) return records;
+        let hasNested = false;
+        for (const key of Object.keys(records[0])) {
+            const val = records[0][key];
+            if (val && typeof val === 'object' && !Array.isArray(val) && key !== 'attributes') {
+                hasNested = true;
+                break;
+            }
+        }
+        if (!hasNested) return records;
+        return records.map(record => {
+            const row = {};
+            for (const key of Object.keys(record)) {
+                const val = record[key];
+                if (val && typeof val === 'object' && !Array.isArray(val) && key !== 'attributes') {
+                    this._flattenObject(val, key, row);
+                } else {
+                    row[key] = val;
+                }
+            }
+            return row;
+        });
+    }
+
+    _flattenObject(obj, prefix, row) {
+        for (const key of Object.keys(obj)) {
+            if (key === 'attributes') continue;
+            const val = obj[key];
+            if (val && typeof val === 'object' && !Array.isArray(val)) {
+                this._flattenObject(val, prefix + '.' + key, row);
+            } else {
+                row[prefix + '.' + key] = val;
+            }
+        }
     }
 
     get _currentTabColumns() {
@@ -1514,6 +1551,7 @@ export default class DevTools extends LightningElement {
                 this._updateActiveTab({
                     isExecuting: false,
                     results: records,
+                    flatResults: this._flattenRecords(records),
                     totalSize: result.totalRecords || records.length,
                     columns,
                     executionTime: execTime,
@@ -1554,6 +1592,7 @@ export default class DevTools extends LightningElement {
                 this._updateActiveTab({
                     isExecuting: false,
                     results: allRecords,
+                    flatResults: this._flattenRecords(allRecords),
                     totalSize: allRecords.length,
                     columns,
                     executionTime: execTime,
@@ -1850,7 +1889,7 @@ export default class DevTools extends LightningElement {
                         const match = succeeded.find(d => d.Id === row.Id);
                         return match ? { ...row, ...match, Id: row.Id } : row;
                     });
-                    this._updateActiveTab({ results: updatedResults });
+                    this._updateActiveTab({ results: updatedResults, flatResults: this._flattenRecords(updatedResults) });
                 }
             }
 

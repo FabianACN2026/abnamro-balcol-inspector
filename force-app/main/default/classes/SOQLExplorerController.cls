@@ -197,11 +197,14 @@ public with sharing class SOQLExplorerController {
             result.objectName = objectName;
             result.records = records;
 
-            if (!records.isEmpty() && objectName != null) {
+            // Build columns from raw JSON maps (more reliable for relationship fields)
+            if (rawRecords != null && !rawRecords.isEmpty() && objectName != null) {
                 Schema.SObjectType objType = Schema.getGlobalDescribe().get(objectName);
-                if (objType != null) {
-                    result.columns = buildColumns(objType, records);
-                }
+                Map<String, Schema.SObjectField> fieldMap = objType != null
+                    ? objType.getDescribe().fields.getMap()
+                    : new Map<String, Schema.SObjectField>();
+                Map<String, Object> firstRaw = (Map<String, Object>) rawRecords[0];
+                result.columns = buildColumnsFromMap(firstRaw, fieldMap, '');
             }
 
             return result;
@@ -415,18 +418,78 @@ public with sharing class SOQLExplorerController {
         Map<String, Schema.SObjectField> fieldMap = objectType.getDescribe().fields.getMap();
         Map<String, Object> firstRecord = records[0].getPopulatedFieldsAsMap();
         for (String fieldName : firstRecord.keySet()) {
-            ColumnInfo col = new ColumnInfo();
-            col.fieldName = fieldName;
-            Schema.SObjectField field = fieldMap.get(fieldName.toLowerCase());
-            if (field != null) {
-                Schema.DescribeFieldResult fd = field.getDescribe();
-                col.label = fd.getLabel();
-                col.type = fd.getType().name();
+            Object val = firstRecord.get(fieldName);
+            if (val instanceof SObject) {
+                // Relationship field — extract nested fields with dot-notation paths
+                flattenColumnsFromSObject((SObject) val, fieldName, columns);
             } else {
-                col.label = fieldName;
-                col.type = 'STRING';
+                ColumnInfo col = new ColumnInfo();
+                col.fieldName = fieldName;
+                Schema.SObjectField field = fieldMap.get(fieldName.toLowerCase());
+                if (field != null) {
+                    Schema.DescribeFieldResult fd = field.getDescribe();
+                    col.label = fd.getLabel();
+                    col.type = fd.getType().name();
+                } else {
+                    col.label = fieldName;
+                    col.type = 'STRING';
+                }
+                columns.add(col);
             }
-            columns.add(col);
+        }
+        return columns;
+    }
+
+    private static void flattenColumnsFromSObject(SObject rel, String prefix, List<ColumnInfo> columns) {
+        Map<String, Object> relFields = rel.getPopulatedFieldsAsMap();
+        for (String relFieldName : relFields.keySet()) {
+            Object nestedVal = relFields.get(relFieldName);
+            if (nestedVal instanceof SObject) {
+                flattenColumnsFromSObject((SObject) nestedVal, prefix + '.' + relFieldName, columns);
+            } else {
+                ColumnInfo col = new ColumnInfo();
+                col.fieldName = prefix + '.' + relFieldName;
+                col.label = prefix + '.' + relFieldName;
+                col.type = 'STRING';
+                columns.add(col);
+            }
+        }
+    }
+
+    /**
+     * Build columns from a raw JSON map (used by cursor path where SObject deserialization
+     * may not preserve relationship fields in getPopulatedFieldsAsMap).
+     */
+    private static List<ColumnInfo> buildColumnsFromMap(Map<String, Object> rawRecord,
+                                                         Map<String, Schema.SObjectField> fieldMap,
+                                                         String prefix) {
+        List<ColumnInfo> columns = new List<ColumnInfo>();
+        for (String key : rawRecord.keySet()) {
+            if (key == 'attributes') continue;
+            Object val = rawRecord.get(key);
+            String fullPath = String.isBlank(prefix) ? key : prefix + '.' + key;
+            if (val instanceof Map<String, Object>) {
+                // Nested relationship object — recurse
+                columns.addAll(buildColumnsFromMap((Map<String, Object>) val, new Map<String, Schema.SObjectField>(), fullPath));
+            } else {
+                ColumnInfo col = new ColumnInfo();
+                col.fieldName = fullPath;
+                if (String.isBlank(prefix)) {
+                    Schema.SObjectField field = fieldMap.get(key.toLowerCase());
+                    if (field != null) {
+                        Schema.DescribeFieldResult fd = field.getDescribe();
+                        col.label = fd.getLabel();
+                        col.type = fd.getType().name();
+                    } else {
+                        col.label = key;
+                        col.type = 'STRING';
+                    }
+                } else {
+                    col.label = fullPath;
+                    col.type = 'STRING';
+                }
+                columns.add(col);
+            }
         }
         return columns;
     }
