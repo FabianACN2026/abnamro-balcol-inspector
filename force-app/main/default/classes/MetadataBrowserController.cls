@@ -14,41 +14,30 @@ public with sharing class MetadataBrowserController {
      * @param searchTerm Optional search term to filter objects by API name or label
      * @return List of ObjectSummary wrappers
      */
-    @SuppressWarnings('PMD.ApexCRUDViolation')
     @AuraEnabled(cacheable=true)
     public static List<ObjectSummary> getAccessibleObjects(String searchTerm) {
-        // EntityDefinition is a setup object; post-query isAccessible() check
-        // ensures only user-accessible objects are returned.
-        // PMD suppression: EntityDefinition doesn't support WITH USER_MODE.
-        List<EntityDefinition> entities = [
-            SELECT QualifiedApiName, Label, KeyPrefix, IsCustomSetting
-            FROM EntityDefinition
-            WHERE IsQueryable = TRUE
-            ORDER BY Label
-            LIMIT 2000
-        ];
-
-        List<ObjectSummary> results = new List<ObjectSummary>();
         Map<String, Schema.SObjectType> globalDescribe = Schema.getGlobalDescribe();
         String searchTermLower = String.isNotBlank(searchTerm)
             ? searchTerm.trim().toLowerCase()
             : null;
 
-        for (EntityDefinition ed : entities) {
-            Schema.SObjectType objType = globalDescribe.get(ed.QualifiedApiName);
-            if (objType != null && objType.getDescribe().isAccessible()) {
-                if (
-                    searchTermLower == null ||
-                    ed.QualifiedApiName.toLowerCase().contains(searchTermLower) ||
-                    (ed.Label != null && ed.Label.toLowerCase().contains(searchTermLower))
-                ) {
-                    results.add(new ObjectSummary(ed));
-                    if (results.size() >= 500) {
-                        break;
-                    }
-                }
+        List<ObjectSummary> results = new List<ObjectSummary>();
+        for (String objName : globalDescribe.keySet()) {
+            Schema.DescribeSObjectResult objDesc = globalDescribe.get(objName).getDescribe();
+            if (!objDesc.isAccessible() || !objDesc.isQueryable()) {
+                continue;
+            }
+            String apiName = objDesc.getName();
+            String label = objDesc.getLabel();
+            if (
+                searchTermLower == null ||
+                apiName.toLowerCase().contains(searchTermLower) ||
+                (label != null && label.toLowerCase().contains(searchTermLower))
+            ) {
+                results.add(new ObjectSummary(apiName, label, desc.getKeyPrefix()));
             }
         }
+        results.sort();
         return results;
     }
 
@@ -68,7 +57,7 @@ public with sharing class MetadataBrowserController {
 
     // ─── Wrapper Classes ───
 
-    public class ObjectSummary {
+    public class ObjectSummary implements Comparable {
         @AuraEnabled public String apiName;
         @AuraEnabled public String label;
         @AuraEnabled public String keyPrefix;
@@ -79,6 +68,20 @@ public with sharing class MetadataBrowserController {
             this.label = ed.Label;
             this.keyPrefix = ed.KeyPrefix;
             this.isCustom = ed.QualifiedApiName.endsWith('__c');
+        }
+
+        public ObjectSummary(String apiName, String label, String keyPrefix) {
+            this.apiName = apiName;
+            this.label = label;
+            this.keyPrefix = keyPrefix;
+            this.isCustom = apiName.endsWith('__c');
+        }
+
+        public Integer compareTo(Object other) {
+            ObjectSummary o = (ObjectSummary) other;
+            return this.label != null && o.label != null
+                ? this.label.compareTo(o.label)
+                : this.apiName.compareTo(o.apiName);
         }
     }
 

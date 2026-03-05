@@ -2072,6 +2072,7 @@ lightning-icon {
 /* ─── Data Loader Operation Buttons ─── */
 .abn-dl-ops {
     flex-wrap: wrap;
+    margin-bottom: 6px;
 }
 
 .abn-dl-ops .abn-btn {
